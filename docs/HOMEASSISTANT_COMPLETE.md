@@ -235,6 +235,37 @@ def tuya_set_property(property_code: str, value: Any):
         tuya_update_all()
 
 @service
+def tuya_get_boolcode():
+    """Get boolCode property (DP_ID 123)"""
+    _LOGGER.info("Getting boolCode...")
+    
+    props = client.get_properties()
+    boolcode_value = props.get("boolCode")
+    
+    if boolcode_value is not None:
+        _LOGGER.info(f"boolCode: {boolcode_value}")
+        hass.set_state("sensor.tuya_boolcode", boolcode_value)
+        return boolcode_value
+    else:
+        _LOGGER.error("boolCode not found")
+        return None
+
+@service
+def tuya_set_boolcode(value: str):
+    """Set boolCode property (DP_ID 123) - Custom status string"""
+    _LOGGER.info(f"Setting boolCode to: {value}")
+    
+    if client.set_property("boolCode", str(value)):
+        hass.set_state("sensor.tuya_boolcode", str(value))
+        _LOGGER.info(f"✓ boolCode set to: {value}")
+        task.sleep(1)
+        tuya_update_all()
+        return True
+    else:
+        _LOGGER.error(f"✗ Failed to set boolCode")
+        return False
+
+@service
 def tuya_create_entities():
     """Create input helpers for all Tuya properties"""
     _LOGGER.info("Creating Tuya entities...")
@@ -534,6 +565,106 @@ data:
   target_temp: 22
 ```
 
+## boolCode Property (DP_ID 123)
+
+### Overview
+
+`boolCode` is a string property (DP_ID 123) that allows setting and reading custom device status codes.
+
+### PyScript Usage
+
+**Get boolCode:**
+```python
+@service
+def get_boolcode_value():
+    """Get current boolCode value"""
+    result = pyscript.tuya_get_boolcode()
+    _LOGGER.info(f"boolCode: {result}")
+
+# Call it:
+# pyscript.get_boolcode_value()
+```
+
+**Set boolCode:**
+```yaml
+automation:
+  - alias: "Set boolCode Status"
+    trigger: ...
+    action:
+      - service: pyscript.tuya_set_boolcode
+        data:
+          value: "cooling"
+```
+
+### REST API Usage
+
+**Get boolCode:**
+```bash
+curl http://localhost:5000/boolcode
+# Returns:
+# {"success": true, "property": "boolCode", "value": "cooling", "type": "string"}
+```
+
+**Set boolCode:**
+```bash
+curl -X POST http://localhost:5000/boolcode \
+  -H "Content-Type: application/json" \
+  -d '{"value":"heating"}'
+# Returns:
+# {"success": true, "property": "boolCode", "value": "heating"}
+```
+
+### Home Assistant Dashboard
+
+**Create input_text helper for boolCode:**
+
+```yaml
+# configuration.yaml
+input_text:
+  tuya_boolcode:
+    name: "Device Status Code"
+    min: 0
+    max: 100
+```
+
+**Dashboard card:**
+
+```yaml
+type: entities
+entities:
+  - entity: input_text.tuya_boolcode
+    name: "Device Status"
+  - entity: sensor.tuya_boolcode
+    name: "Current Status (readonly)"
+```
+
+**Automation to sync:**
+
+```yaml
+automation:
+  - alias: "Sync boolCode"
+    trigger:
+      platform: state
+      entity_id: input_text.tuya_boolcode
+    action:
+      - service: pyscript.tuya_set_boolcode
+        data:
+          value: "{{ states('input_text.tuya_boolcode') }}"
+```
+
+### Common boolCode Values
+
+| Value | Meaning |
+|-------|---------|
+| `on` | Device powered on |
+| `off` | Device powered off |
+| `cooling` | In cooling mode |
+| `heating` | In heating mode |
+| `idle` | Idle/standby |
+| `error` | Error state |
+
+*Note: Supported values depend on your specific Tuya device configuration.*
+
 ## Resources
 
 - [Home Assistant Docs](https://www.home-assistant.io/)
@@ -549,3 +680,5 @@ data:
 - Automations
 - Custom dashboards
 - Real-time updates
+- **boolCode support (DP_ID 123)**
+

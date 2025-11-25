@@ -41,6 +41,11 @@ input_number:
     unit_of_measurement: "×10°C"
     icon: mdi:thermometer
 
+input_text:
+  tuya_boolcode:
+    name: "Device Status Code"
+    icon: mdi:information
+
 input_select:
   tuya_mode:
     name: "Mode"
@@ -133,6 +138,34 @@ input_select:
       data:
         message: "⚠️ Hohe PM2.5: {{ states('sensor.tuya_pm25') }}"
         title: "Luftqualität kritisch"
+
+# Automation 6: boolCode synchronisieren
+- id: tuya_boolcode_sync
+  alias: "Tuya: boolCode Synchronisierung"
+  description: "Sync boolCode input_text mit Device"
+  trigger:
+    platform: state
+    entity_id: input_text.tuya_boolcode
+  action:
+    - service: pyscript.tuya_set_boolcode
+      data:
+        value: "{{ trigger.to_state.state }}"
+    - service: notify.mobile_app
+      data:
+        message: "boolCode gesetzt auf: {{ trigger.to_state.state }}"
+
+# Automation 7: boolCode auslesen und anzeigen
+- id: tuya_boolcode_read
+  alias: "Tuya: boolCode auslesen"
+  trigger:
+    platform: time_pattern
+    minutes: 5
+  action:
+    - service: pyscript.tuya_get_boolcode
+    - service: persistent_notification.create
+      data:
+        message: "boolCode: {{ states('sensor.tuya_boolcode') }}"
+        title: "Device Status"
 ```
 
 ### C) Template Sensoren (template.yaml)
@@ -298,9 +331,56 @@ views:
               - entity: input_number.tuya_temp_set
               - entity: input_select.tuya_windspeed
               - entity: input_boolean.tuya_freshair_filter
+              - entity: input_text.tuya_boolcode
+                name: "Device Status"
 ```
 
-### 3) Sensor-Heavy Dashboard
+### 3) boolCode Dashboard
+
+```yaml
+views:
+  - title: Device Status
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              # 📊 Device Status via boolCode
+          
+          - type: entities
+            title: "boolCode Control"
+            entities:
+              - entity: sensor.tuya_boolcode
+                name: "Current Status (readonly)"
+              - entity: input_text.tuya_boolcode
+                name: "Set Status"
+          
+          - type: custom:button-card
+            name: "🟢 Cooling"
+            tap_action:
+              action: call-service
+              service: pyscript.tuya_set_boolcode
+              data:
+                value: "cooling"
+          
+          - type: custom:button-card
+            name: "🔴 Heating"
+            tap_action:
+              action: call-service
+              service: pyscript.tuya_set_boolcode
+              data:
+                value: "heating"
+          
+          - type: custom:button-card
+            name: "⏸️ Idle"
+            tap_action:
+              action: call-service
+              service: pyscript.tuya_set_boolcode
+              data:
+                value: "idle"
+```
+
+### 4) Sensor-Heavy Dashboard
 
 ```yaml
 views:

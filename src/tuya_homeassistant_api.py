@@ -182,6 +182,18 @@ def get_property_schemas():
             "style": ["manual", "smart"],
             "energy": ["on", "off"],
         },
+        "string": {
+            "boolCode": {
+                "description": "Device status code (DP_ID 123)",
+                "readonly": False,
+                "examples": ["on", "off", "cooling", "heating", "auto"],
+                "note": "Set custom string values to control or display device status"
+            },
+            "SN_SW_ver": {
+                "description": "Serial number and software version",
+                "readonly": True
+            }
+        },
         "readonly": ["temp_current", "humidity_current", "airquality", "pm25", "SN_SW_ver"]
     }
     return jsonify({
@@ -213,6 +225,62 @@ def health_check():
 # ============================================================
 # Home Assistant Integration Endpoint
 # ============================================================
+
+@app.route("/boolcode", methods=["GET"])
+def get_boolcode():
+    """Get boolCode property (DP_ID 123) - String value"""
+    try:
+        props = client.get_device_properties()
+        boolcode_value = props.get("boolCode")
+        
+        if boolcode_value is None:
+            return jsonify({
+                "success": False,
+                "error": "boolCode property not found"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "property": "boolCode",
+            "value": boolcode_value,
+            "type": "string",
+            "description": "Device status code (string)"
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
+
+@app.route("/boolcode", methods=["POST"])
+def set_boolcode():
+    """Set boolCode property (DP_ID 123) - String value"""
+    try:
+        data = request.get_json()
+        value = data.get("value")
+        
+        if value is None:
+            return jsonify({
+                "success": False,
+                "error": "Missing value parameter"
+            }), 400
+        
+        # Ensure value is string
+        value_str = str(value)
+        
+        result = client.set_device_property("boolCode", value_str)
+        
+        return jsonify({
+            "success": result,
+            "property": "boolCode",
+            "value": value_str,
+            "type": "string"
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
 
 @app.route("/api/v1/ha-entities", methods=["GET"])
 def ha_entities():
@@ -308,9 +376,17 @@ if __name__ == "__main__":
 ║    GET  /device          - Device info
 ║    GET  /schemas         - Property schemas
 ║    GET  /health          - Health check
+║    GET  /boolcode        - Get boolCode (DP_ID 123)
+║    POST /boolcode        - Set boolCode (DP_ID 123)
 ║    GET  /api/v1/ha-entities - HA entities
 ║
-║  Example (curl):
+║  boolCode Examples:
+║    GET:  curl http://localhost:5000/boolcode
+║    SET:  curl -X POST http://localhost:5000/boolcode \\
+║           -H "Content-Type: application/json" \\
+║           -d '{{"value":"cooling"}}'
+║
+║  Other Examples (curl):
 ║    curl http://localhost:5000/properties
 ║    curl -X POST http://localhost:5000/set \\
 ║      -H "Content-Type: application/json" \\

@@ -95,6 +95,7 @@ MODES & CONTROLS
 FILTERS & STATUS
 ├─ freshair_filter     ─────▶ input_boolean.tuya_freshair_filter ▶ [Toggle]
 ├─ hot_cold_wind       ─────▶ input_boolean.tuya_hot_cold_wind  ▶ [Toggle]
+├─ boolCode            ─────▶ input_text.tuya_boolcode         ▶ [Text Input]
 └─ work_time           ─────▶ sensor.tuya_work_time            ▶ [Display]
 
 SENSORS (READ-ONLY)
