@@ -51,19 +51,16 @@ INSTALL_DIR="/root/tuya_client"
 
 if [ -d "$INSTALL_DIR" ]; then
     echo "ℹ️  Verzeichnis $INSTALL_DIR existiert bereits."
-    echo "   Wähle eine Option:"
-    echo "   1) Überschreiben (git pull)"
-    echo "   2) Beende Installation"
-    read -p "Deine Wahl [1/2]: " choice
-    
-    if [ "$choice" = "1" ]; then
+    echo "   Aktualisiere mit: git pull..."
+    cd "$INSTALL_DIR"
+    git pull origin main 2>/dev/null || {
+        echo "⚠️  Git pull fehlgeschlagen. Starte Neuinstallation..."
+        cd /root
+        rm -rf tuya_client
+        git clone https://github.com/Minexvibx123/Tuya-Client-for-API-Cloud-Connection.git "$INSTALL_DIR"
         cd "$INSTALL_DIR"
-        git pull origin main
-        echo "✓ Projekt aktualisiert"
-    else
-        echo "❌ Installation abgebrochen"
-        exit 0
-    fi
+    }
+    echo "✓ Projekt aktualisiert/heruntergeladen nach: $INSTALL_DIR"
 else
     echo "Klone Repository..."
     git clone https://github.com/Minexvibx123/Tuya-Client-for-API-Cloud-Connection.git "$INSTALL_DIR"
@@ -124,6 +121,25 @@ EOF
     echo "✓ config.yaml erstellt"
 else
     echo "✓ config.yaml existiert"
+    read -p "Möchtest du die Credentials aktualisieren? [j/n]: " update_config
+    
+    if [ "$update_config" = "j" ] || [ "$update_config" = "y" ]; then
+        read -p "Tuya Access ID: " ACCESS_ID
+        read -p "Tuya Access Key: " ACCESS_KEY
+        read -p "Tuya Device ID: " DEVICE_ID
+        read -p "Tuya Region [eu/us/cn]: " REGION
+        REGION=${REGION:-eu}
+        
+        cat > config.yaml <<EOF
+tuya_api:
+  access_id: "$ACCESS_ID"
+  access_key: "$ACCESS_KEY"
+  device_id: "$DEVICE_ID"
+  region: "$REGION"
+EOF
+        
+        echo "✓ config.yaml aktualisiert"
+    fi
 fi
 
 # ============================================================
