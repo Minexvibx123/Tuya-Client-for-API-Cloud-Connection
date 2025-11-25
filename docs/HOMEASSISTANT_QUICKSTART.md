@@ -4,30 +4,169 @@
 
 ### Option 1: PyScript (Empfohlen - Vollständig)
 
-**1. PyScript installieren**
+**1. PyScript Installation & Dependencies**
+
 ```
-Home Assistant → Einstellungen → Zusatzprogramme → PyScript
+Home Assistant → Einstellungen → Zusatzprogramme → HACS
 ```
 
-**2. Datei erstellen**
+a) HACS öffnen (falls nicht installiert):
+```
+Instellungen → Geräte & Dienste → HACS
+(oder https://www.hacs.xyz/ für Installation)
+```
+
+b) PyScript suchen & installieren:
+```
+HACS → Automation (Suchfeld oben)
+Suche: "PyScript"
+Klick auf "pyscript"
+Klick: "INSTALL"
+```
+
+c) Home Assistant neu starten
+```
+Einstellungen → System → Starten Sie Home Assistant neu
+oder
+Terminal: systemctl restart homeassistant
+```
+
+d) PyScript aktivieren in `configuration.yaml`:
+```yaml
+pyscript:
+  allow_all_imports: true
+  file_reloader: true
+```
+
+e) Nochmal neu starten
+
+**2. Dependencies in PyScript installieren**
+
+PyScript lädt diese automatisch herunter (wenn erlaubt):
+- `requests` - HTTP-Requests zu Tuya API
+- `yaml` - Config-Dateien lesen
+- `hmac` - Signierung (im Python Standard)
+- `hashlib` - Hashing (im Python Standard)
+- `json` - JSON-Verarbeitung (im Python Standard)
+- `time` - Zeit-Funktionen (im Python Standard)
+- `logging` - Logging (im Python Standard)
+
+*Die meisten sind bereits in Python enthalten!*
+
+Wenn du manuell installieren musst:
+
+```bash
+# SSH in Home Assistant oder Terminal Add-on
+pip install requests pyyaml
+
+# oder für Home Assistant Container:
+docker exec homeassistant pip install requests pyyaml
+```
+
+**3. Datei erstellen**
 ```
 /config/pyscript/tuya_client.py
 ```
 Kopiere Inhalt aus `docs/HOMEASSISTANT_COMPLETE.md` (tuya_client.py Sektion)
 
-**3. Credentials eintragen**
+**4. Credentials eintragen**
 ```python
 TUYA_ACCESS_ID = "xxxxx"
 TUYA_ACCESS_KEY = "xxxxx"
 TUYA_DEVICE_ID = "xxxxx"
 ```
 
-**4. Home Assistant neu starten**
+**5. Home Assistant neu starten**
 
-**5. Lovelace Dashboard nutzen**
+**6. Lovelace Dashboard nutzen**
 ```yaml
 - entity: input_boolean.tuya_power
   name: "Power"
+```
+
+---
+
+### Detaillierte Anleitung: Wie PyScript Dependencies herunterlädt
+
+#### Schritt 1: HACS Installation
+```
+1. Gehe zu: Home Assistant → Einstellungen
+2. Wähle: "Geräte & Dienste"
+3. Klick: "+ Neue Integration erstellen"
+4. Suche: "HACS"
+5. Installiere HACS
+6. Starte Home Assistant neu
+```
+
+#### Schritt 2: PyScript via HACS installieren
+```
+1. Öffne: HACS (oben rechts in HA)
+2. Wähle: "Automation" (linkes Menü)
+3. Oben: "Erkunden & Herunterladen Repositories"
+4. Suche: "pyscript"
+5. Klick: "pyscript by CustomComponents"
+6. Klick: "INSTALL"
+7. Bestätige Installation
+8. Starte Home Assistant neu
+```
+
+#### Schritt 3: Dependencies automatisch laden
+PyScript lädt Dependencies automatisch, wenn:
+
+```yaml
+# configuration.yaml
+pyscript:
+  allow_all_imports: true      # ← WICHTIG! Erlaubt Imports
+  file_reloader: true          # ← Optional: Auto-Reload
+```
+
+Mit `allow_all_imports: true`:
+- ✅ requests (wird heruntergeladen)
+- ✅ yaml (wird heruntergeladen)
+- ✅ hmac, hashlib, json (bereits in Python)
+
+#### Schritt 4: Manuell prüfen/installieren
+Wenn Dependencies nicht automatisch laden:
+
+**Via SSH/Terminal Add-on:**
+```bash
+# SSH Terminal öffnen
+ssh root@192.168.1.100  # (deine HA IP)
+
+# Dependencies installieren
+pip install requests pyyaml
+
+# Oder für Home Assistant OS:
+docker exec homeassistant pip install requests pyyaml
+```
+
+**Terminal Add-on in Home Assistant:**
+```
+Einstellungen → Zusatzprogramme → "Terminal & SSH"
+oder
+Einstellungen → Zusatzprogramme → Alle Add-ons anzeigen → "+ Terminal & SSH"
+```
+
+Dann im Terminal:
+```bash
+pip install requests pyyaml
+```
+
+#### Schritt 5: Verifikation
+Prüfe ob alles funktioniert:
+
+```python
+# In PyScript oder Developer Tools → Python Shell
+import requests
+import yaml
+print("✓ Alle Dependencies geladen!")
+```
+
+Oder via Home Assistant Developer Tools:
+```
+Developer Tools → Services
+Suche: "pyscript"
+Sollte Services anzeigen wie: pyscript.tuya_update_all
 ```
 
 ---

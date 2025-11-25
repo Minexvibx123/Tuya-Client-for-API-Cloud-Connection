@@ -298,6 +298,7 @@ Complete integration guides available:
 
 ### Full Documentation
 📚 **[Complete Integration Guide](./HOMEASSISTANT_COMPLETE.md)** - Comprehensive PyScript setup
+📚 **[PyScript Dependencies Guide](./PYSCRIPT_DEPENDENCIES.md)** - Detailed dependency installation
 📚 **[Integration Examples](./HOMEASSISTANT_EXAMPLES.md)** - Practical automations and dashboards
 
 ### Features

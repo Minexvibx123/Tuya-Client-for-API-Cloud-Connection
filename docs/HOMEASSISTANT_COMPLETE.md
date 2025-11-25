@@ -17,29 +17,55 @@ Integrate Tuya Client with Home Assistant to:
 1. Home Assistant running (minimum 2021.12.0)
 2. HACS installed
 3. PyScript addon installed
+4. Dependencies: `requests`, `yaml`, `hmac`, `hashlib`, `json` (mostly built-in)
 
-#### Step 1: Install PyScript
+#### Step 0: Understanding Dependencies
+
+PyScript needs these Python packages:
+- **requests** - HTTP calls to Tuya API
+- **pyyaml** - Read YAML configs
+- **Standard libs** - hmac, hashlib, json, time, logging (included with Python)
+
+These are installed automatically if you set `allow_all_imports: true`
+
+For manual installation, see: `docs/PYSCRIPT_DEPENDENCIES.md`
+
+#### Step 1: Install PyScript via HACS
 
 ```
-Home Assistant → Settings → Devices & Services → Create Automation
-Search: "PyScript"
-Install the PyScript integration
+1. Home Assistant → Settings → Devices & Services
+2. Click "+ Create Automation"
+3. Search: "HACS"
+4. Install HACS first (if not installed)
+5. Then: HACS → Automation → Search "PyScript"
+6. Click "pyscript"
+7. Click "INSTALL"
+8. Restart Home Assistant
 ```
 
-Or via HACS:
-```
-HACS → Automation → Search "PyScript" → Install
-```
+Detailed guide: `docs/PYSCRIPT_DEPENDENCIES.md`
 
 #### Step 2: Enable PyScript in configuration.yaml
 
 ```yaml
 pyscript:
-  allow_all_imports: true
+  allow_all_imports: true    # ← IMPORTANT! Auto-loads dependencies
   file_reloader: true
 ```
 
-Restart Home Assistant!
+**IMPORTANT:** Without `allow_all_imports: true`, dependencies won't be imported!
+
+Restart Home Assistant:
+```
+Settings → System → "Restart Home Assistant"
+```
+
+Verify success:
+```
+Developer Tools → Services
+Search: "pyscript"
+Should show: pyscript.tuya_update_all, etc.
+```
 
 #### Step 3: Create Tuya Client PyScript
 
