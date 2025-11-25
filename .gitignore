@@ -140,10 +140,15 @@ credentials.json
 device_cache.json
 tuya_client.log
 
-# Tuya Project Files (sensitive)
-config/*.yaml
+# Tuya Project Files (sensitive - real credentials)
+config/config.yaml
+config/tuya_config.yaml
 config/secrets.yaml
 config/*.pyscript
+config/.env*
+
+# Keep example files for documentation
+!config/*.example
 
 # Build outputs
 build_output/

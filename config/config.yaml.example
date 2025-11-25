@@ -1,0 +1,15 @@
+# Configuration template - Copy and edit this file
+# Usage: cp config.yaml.example config.yaml
+
+cloud:
+  access_id: "your_tuya_api_key"
+  access_key: "your_tuya_api_secret"
+  region: "eu"
+
+devices:
+  - name: "Your Device Name"
+    device_id: "your_device_uuid"
+    type: "Climate"
+
+debug: false
+log_level: "INFO"

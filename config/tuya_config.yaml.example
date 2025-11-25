@@ -1,0 +1,68 @@
+# Tuya Device Configuration with DP_IDs
+# Extended configuration for all 35+ device properties
+
+cloud:
+  access_id: "your_tuya_api_key"
+  access_key: "your_tuya_api_secret"
+  region: "eu"
+
+devices:
+  - name: "Your Device"
+    device_id: "your_device_id"
+    type: "Climate"
+
+property_types:
+  bool:
+    Power: 1
+    dirty_filter: 131
+    freshair_filter: 103
+    hot_cold_wind: 132
+  
+  value:
+    temp_set: 2
+    temp_current: 3
+    humidity_current: 18
+    pm25: 101
+    savemoney_temp: 130
+    run_time: 135
+    totalN: 115
+    totalP: 116
+  
+  enum:
+    mode: 4
+    windspeed: 5
+    airquality: 125
+    sleep: 105
+    energy: 120
+    kwh: 129
+    money: 119
+    temp_unit_convert: 19
+    left_right_sweep: 114
+    up_down_sweep: 113
+    left_right_freeze: 127
+    up_down_freeze: 126
+    wind: 133
+    style: 128
+  
+  string:
+    boolCode: 123
+    SN_SW_ver: 104
+    work_time: 134
+  
+  readonly:
+    - temp_current
+    - humidity_current
+    - temp_current_f
+    - Fault
+    - fault2
+    - airquality
+    - pm25
+    - SN_SW_ver
+    - energy
+    - kwh
+    - money
+    - totalN
+    - totalP
+    - run_time
+    - work_time
+    - markbit
