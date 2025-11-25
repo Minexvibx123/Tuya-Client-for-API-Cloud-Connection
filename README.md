@@ -447,6 +447,5 @@ MIT License
   - Full Cloud API implementation
   - PyQt6 GUI application
   - Command-line interface
-  - Home Assistant integration
   - Configuration management
   - Type-aware property handling
