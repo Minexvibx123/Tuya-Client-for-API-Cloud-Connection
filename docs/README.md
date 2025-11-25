@@ -291,7 +291,26 @@ print(f"Humidity: {props['humidity_current']['value']}%")
 
 ## Home Assistant Integration
 
-### PyScript Setup
+Complete integration guides available:
+
+### Quick Start
+📖 **[Home Assistant Quick Start](./HOMEASSISTANT_QUICKSTART.md)** - 5-minute setup
+
+### Full Documentation
+📚 **[Complete Integration Guide](./HOMEASSISTANT_COMPLETE.md)** - Comprehensive PyScript setup
+📚 **[Integration Examples](./HOMEASSISTANT_EXAMPLES.md)** - Practical automations and dashboards
+
+### Features
+- ✅ View all 35+ device properties as entities
+- ✅ Interactive dashboard controls
+- ✅ Automatic temperature/mode settings
+- ✅ Air quality monitoring & alerts
+- ✅ Filter status tracking
+- ✅ Home Assistant automations
+- ✅ Mobile notifications
+- ✅ REST API alternative
+
+### PyScript Setup (Traditional)
 
 1. Install PyScript in Home Assistant
 2. Add to configuration.yaml:
@@ -302,31 +321,68 @@ print(f"Humidity: {props['humidity_current']['value']}%")
 3. Copy `tuya_homeassistant.pyscript` to `/config/pyscript/`
 4. Restart Home Assistant
 
+### REST API Setup (Alternative)
+
+Run the Flask-based REST API for simpler integration:
+
+```bash
+python3 src/tuya_homeassistant_api.py --port 5000
+```
+
+Then configure Home Assistant with `rest_command`:
+
+```yaml
+rest_command:
+  tuya_set_property:
+    url: "http://192.168.1.100:5000/set"
+    method: post
+    payload: '{"property":"{{ property }}", "value":{{ value }}}'
+```
+
 ### Available Services
 
 Services are exposed for Home Assistant automations:
 
 - `pyscript.tuya_update_all` - Refresh all entity values from device
-- `pyscript.tuya_set_value` - Set a property value
+- `pyscript.tuya_set_property` - Set a property value
 - `pyscript.tuya_create_entities` - Initialize all entities
 
-See `HOMEASSISTANT_SETUP.md` for detailed integration instructions.
+REST API endpoints available at `http://localhost:5000/`:
+
+- `GET /status` - Current device status
+- `GET /properties` - All device properties  
+- `GET /property/<code>` - Single property value
+- `POST /set` - Set property value
+- `POST /batch` - Set multiple properties
+- `GET /device` - Device information
+- `GET /schemas` - Property type schemas
+- `GET /health` - Health check endpoint
+
+See **[HOMEASSISTANT_COMPLETE.md](./HOMEASSISTANT_COMPLETE.md)** for detailed integration instructions.
 
 ## Project Structure
 
 ```
 tuya_client/
-├── client.py                      Core API client library
-├── tuya_gui.py                    PyQt6 graphical interface
-├── tuya_control.py                Command-line interface
-├── launcher.py                    Application launcher
-├── config.yaml                    Configuration file
-├── tuya_config.yaml               Extended configuration with DP IDs
-├── tuya_homeassistant.pyscript   Home Assistant integration
-├── requirements.txt               Python dependencies
-├── README.md                      This file
-├── HOMEASSISTANT_SETUP.md        Home Assistant setup guide
-└── start_gui.bat                 Windows GUI launcher
+├── src/
+│   ├── client.py                      Core API client library
+│   ├── tuya_gui.py                    PyQt6 graphical interface
+│   ├── tuya_control.py                Command-line interface
+│   ├── launcher_gui.py                GUI launcher
+│   ├── launcher_cli.py                CLI launcher
+│   ├── tuya_homeassistant_api.py      REST API for HA integration
+│   └── build.py                       PyInstaller build script
+├── docs/
+│   ├── README.md                      Main documentation
+│   ├── HOMEASSISTANT_QUICKSTART.md   Quick 5-minute setup
+│   ├── HOMEASSISTANT_COMPLETE.md     Full integration guide
+│   └── HOMEASSISTANT_EXAMPLES.md     Practical examples
+├── config/
+│   ├── config.yaml.example            Config template
+│   └── tuya_config.yaml.example       Extended config with DP IDs
+├── build_output/                      Compiled executables
+├── requirements.txt                   Python dependencies
+└── setup.py                           Package setup
 ```
 
 ## Error Handling
