@@ -141,9 +141,14 @@ device_cache.json
 tuya_client.log
 
 # Tuya Project Files (sensitive)
-config.yaml
-tuya_config.yaml
-secrets.yaml
+config/*.yaml
+config/secrets.yaml
+config/*.pyscript
+
+# Build outputs
+build_output/
+build/
+dist/
 
 # IDE & Editor
 *.code-workspace
