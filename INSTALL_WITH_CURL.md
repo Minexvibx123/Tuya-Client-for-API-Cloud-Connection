@@ -13,7 +13,8 @@ curl -fsSL https://raw.githubusercontent.com/Minexvibx123/Tuya-Client-for-API-Cl
 ✅ **Automatische Konfiguration:**
 - Prüft Python & git Installation
 - Lädt Projekt von GitHub herunter
-- Installiert alle Dependencies (`flask`, `flask-cors`, `yaml`, etc.)
+- Installiert nur **core dependencies** (kein PyQt6!)
+  - `flask`, `flask-cors`, `pyyaml`, `requests`
 - Erstellt `config.yaml` mit deinen Credentials
 - Richtet Systemd Service ein (optional, mit Autostart)
 - Verifiziert Installation
@@ -24,6 +25,11 @@ curl -fsSL https://raw.githubusercontent.com/Minexvibx123/Tuya-Client-for-API-Cl
 - Optional: Systemd Service für Autostart
 - Logs & Debugging
 - Health-Check nach Installation
+
+**Wichtig:** PyQt6 (GUI) wird NICHT installiert!
+- REST API braucht nur core Dependencies
+- PyQt6 würde lange Kompilierung auf Raspi brauchen
+- Für Desktop GUI: `pip install -r requirements-gui.txt`
 
 ## Schritt-für-Schritt
 

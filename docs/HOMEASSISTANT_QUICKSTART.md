@@ -338,14 +338,19 @@ Speichern:
 ```bash
 # Im SSH Terminal auf dem Raspi
 
-pip install flask flask-cors pyyaml
+# WICHTIG: Nutze nur core requirements (KEIN PyQt6!)
+pip install -q -r requirements.txt
 
-# Oder für Home Assistant Container:
-docker exec homeassistant pip install flask flask-cors pyyaml
+# Oder einzeln (einfacher):
+pip install flask flask-cors pyyaml requests
 
 # Verifizieren:
-python3 -c "import flask, yaml; print('✓ OK')"
+python3 -c "import flask, yaml, requests; print('✓ OK')"
 ```
+
+**Hinweis:** PyQt6 ist optional (nur für Desktop GUI auf Linux/Windows)
+- Nicht installieren auf Raspberry Pi (lange Kompilierung)
+- REST API braucht nur: `flask`, `flask-cors`, `pyyaml`, `requests`
 
 ---
 

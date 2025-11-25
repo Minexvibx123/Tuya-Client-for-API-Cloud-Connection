@@ -79,16 +79,20 @@ echo ""
 echo "4️⃣  Installiere Python Dependencies..."
 
 if [ -f "requirements.txt" ]; then
+    # Installiere CORE Dependencies (kein PyQt6!)
     pip install -q -r requirements.txt
-    echo "✓ Requirements installiert"
+    echo "✓ Core requirements installiert (Flask, YAML, requests)"
 else
     echo "❌ requirements.txt nicht gefunden!"
     exit 1
 fi
 
-# Extra Dependencies für REST API
+# Extra Dependencies für REST API (falls nicht in requirements.txt)
 echo "   Installiere Flask Dependencies..."
-pip install -q flask flask-cors
+pip install -q flask flask-cors pyyaml
+
+echo "ℹ️  PyQt6 (GUI) ist OPTIONAL - nicht installiert"
+echo "   Wenn benötigt: pip install -r requirements-gui.txt"
 
 # ============================================================
 # 5. CONFIG: config.yaml überprüfen

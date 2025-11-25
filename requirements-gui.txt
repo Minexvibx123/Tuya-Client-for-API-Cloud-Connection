@@ -1,0 +1,11 @@
+# GUI Dependencies (Optional)
+# Nur installieren wenn du die Desktop GUI nutzen möchtest
+# 
+# Installation:
+#   pip install -r requirements-gui.txt
+
+PyQt6>=6.0.0
+PyQt6-Charts>=6.0.0
+
+# Note: Diese Abhängigkeiten können lange kompilieren auf Raspberry Pi
+# Für REST API (Server) nicht erforderlich!
