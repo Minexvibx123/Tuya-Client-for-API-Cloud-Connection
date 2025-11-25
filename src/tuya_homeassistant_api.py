@@ -216,20 +216,25 @@ def get_property_schemas():
 def health_check():
     """Health check endpoint"""
     try:
-        # Try to get token to verify connection
-        if client.get_token():
+        # Simple health check: verify we can get properties
+        props = client.get_device_properties()
+        
+        if props and isinstance(props, dict):
             return jsonify({
                 "status": "healthy",
-                "connected": True
+                "connected": True,
+                "properties_count": len(props)
             })
         else:
             return jsonify({
                 "status": "unhealthy",
-                "connected": False
+                "connected": False,
+                "error": "No properties returned"
             }), 503
     except Exception as e:
         return jsonify({
             "status": "error",
+            "connected": False,
             "error": str(e)
         }), 503
 
@@ -391,17 +396,22 @@ if __name__ == "__main__":
 ║    POST /boolcode        - Set boolCode (DP_ID 123)
 ║    GET  /api/v1/ha-entities - HA entities
 ║
+║  Test Endpoint:
+║    curl http://{args.host}:{args.port}/health
+║
 ║  boolCode Examples:
-║    GET:  curl http://localhost:5000/boolcode
-║    SET:  curl -X POST http://localhost:5000/boolcode \\
+║    GET:  curl http://{args.host}:{args.port}/boolcode
+║    SET:  curl -X POST http://{args.host}:{args.port}/boolcode \\
 ║           -H "Content-Type: application/json" \\
 ║           -d '{{"value":"cooling"}}'
 ║
 ║  Other Examples (curl):
-║    curl http://localhost:5000/properties
-║    curl -X POST http://localhost:5000/set \\
+║    curl http://{args.host}:{args.port}/properties
+║    curl -X POST http://{args.host}:{args.port}/set \\
 ║      -H "Content-Type: application/json" \\
 ║      -d '{{"property":"Power", "value":true}}'
+║
+║  ✓ Health check ready: http://{args.host}:{args.port}/health
 ╚════════════════════════════════════════════════════════════╝
     """)
     
