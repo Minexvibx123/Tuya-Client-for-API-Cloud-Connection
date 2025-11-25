@@ -5,6 +5,17 @@ Provides simple REST endpoints for HA integration
 
 Usage:
   python3 src/tuya_homeassistant_api.py --port 5000
+
+Installation von GitHub (curl):
+  # Auf Raspberry Pi / Linux:
+  curl -fsSL https://raw.githubusercontent.com/Minexvibx123/Tuya-Client-for-API-Cloud-Connection/main/install_rest_api.sh | bash
+  
+  # Oder manuelle Installation:
+  cd /root && curl -o tuya_client.tar.gz https://github.com/Minexvibx123/Tuya-Client-for-API-Cloud-Connection/archive/refs/heads/main.tar.gz
+  tar -xzf tuya_client.tar.gz
+  cd Tuya-Client-for-API-Cloud-Connection-main
+  pip install -r requirements.txt
+  python3 src/tuya_homeassistant_api.py --port 5000
 """
 
 from flask import Flask, request, jsonify
