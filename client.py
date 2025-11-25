@@ -5,8 +5,12 @@ Offizielle API: https://developer.tuya.com/en/docs/iot/new-singnature?id=Kbw0q34
 """
 
 import sys
-if sys.stdout.encoding != 'utf-8':
-    sys.stdout.reconfigure(encoding='utf-8')
+# Fix für PyInstaller: stdout kann None sein
+try:
+    if sys.stdout and sys.stdout.encoding != 'utf-8':
+        sys.stdout.reconfigure(encoding='utf-8')
+except (AttributeError, RuntimeError):
+    pass
 
 import logging
 import yaml
