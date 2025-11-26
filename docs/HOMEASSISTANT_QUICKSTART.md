@@ -535,10 +535,11 @@ rest_command:
     payload: '{"property":"{{ property }}", "value":{{ value }}}'
     content_type: application/json
   
+  # WICHTIG: boolCode nutzt STRING values!
   tuya_set_boolcode:
     url: "http://192.168.1.100:5000/boolcode"
     method: post
-    payload: '{"value":"{{ value }}"}'
+    payload: '{"value":"{{ boolcode_value }}"}'
     content_type: application/json
 ```
 
@@ -558,7 +559,7 @@ automation:
       - service: rest_command.tuya_get_properties
 ```
 
-**Beispiel 2: Property setzen**
+**Beispiel 2: Property setzen (Numbers/Booleans)**
 
 ```yaml
 automation:
@@ -569,22 +570,50 @@ automation:
     action:
       - service: rest_command.tuya_set_property
         data:
-          property: "Power"
-          value: true
+          property: "Power"      # ← Property Name
+          value: true            # ← Boolean/Number value
 ```
 
-**Beispiel 3: boolCode setzen**
+**Beispiel 3: boolCode setzen (STRING!)**
+
+**WICHTIG:** boolCode ist ein STRING, nicht Boolean!
 
 ```yaml
 automation:
-  - alias: "Tuya: boolCode setzen"
+  - alias: "Tuya: boolCode auf Cooling setzen"
     trigger:
       platform: state
-      entity_id: input_text.tuya_boolcode
+      entity_id: input_select.tuya_boolcode
     action:
       - service: rest_command.tuya_set_boolcode
         data:
-          value: "{{ states('input_text.tuya_boolcode') }}"
+          boolcode_value: "{{ states('input_select.tuya_boolcode') }}"
+          # Beispiele für boolCode Werte:
+          # - "cooling"
+          # - "heating"
+          # - "auto"
+          # - "on"
+          # - "off"
+```
+
+**Curl Beispiele zum Testen:**
+
+```bash
+# GET Properties
+curl http://192.168.1.100:5000/properties
+
+# GET boolCode
+curl http://192.168.1.100:5000/boolcode
+
+# SET Power (Boolean)
+curl -X POST http://192.168.1.100:5000/set \
+  -H "Content-Type: application/json" \
+  -d '{"property":"Power", "value":true}'
+
+# SET boolCode (STRING!)
+curl -X POST http://192.168.1.100:5000/boolcode \
+  -H "Content-Type: application/json" \
+  -d '{"value":"cooling"}'
 ```
 
 #### Step 4: Template Sensoren (Optional)
