@@ -42,13 +42,26 @@ try:
     with open("config.yaml", "r") as f:
         import yaml
         config = yaml.safe_load(f)
-        API_CONFIG = config["tuya_api"]
-except:
-    _LOGGER.error("❌ config.yaml not found. Please create it first.")
+except Exception as e:
+    _LOGGER.error(f"❌ config.yaml not found. Error: {e}")
     sys.exit(1)
 
 # Initialize client
-client = TuyaCloudClient(API_CONFIG)
+# Note: TuyaCloudClient expects config.yaml file path
+try:
+    client = TuyaCloudClient("config.yaml")
+except Exception as e:
+    _LOGGER.error(f"❌ Failed to initialize TuyaCloudClient: {e}")
+    sys.exit(1)
+
+# Get first device from config
+devices = config.get("devices", [])
+if not devices:
+    _LOGGER.error("❌ No devices configured in config.yaml")
+    sys.exit(1)
+
+PRIMARY_DEVICE_ID = devices[0].get("device_id")
+_LOGGER.info(f"✓ Using device: {devices[0].get('name')} ({PRIMARY_DEVICE_ID})")
 
 # ============================================================
 # REST Endpoints for Home Assistant
@@ -58,7 +71,14 @@ client = TuyaCloudClient(API_CONFIG)
 def get_status():
     """Get current device status"""
     try:
-        status = client.get_device_status()
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
+        status = client.get_device_status(PRIMARY_DEVICE_ID, token)
         return jsonify({
             "success": True,
             "data": status
@@ -73,7 +93,14 @@ def get_status():
 def get_properties():
     """Get all device properties"""
     try:
-        props = client.get_device_properties()
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
+        props = client.get_device_properties(PRIMARY_DEVICE_ID, token)
         return jsonify({
             "success": True,
             "data": props
@@ -88,7 +115,14 @@ def get_properties():
 def get_property(property_code):
     """Get single property"""
     try:
-        props = client.get_device_properties()
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
+        props = client.get_device_properties(PRIMARY_DEVICE_ID, token)
         value = props.get(property_code)
         if value is None:
             return jsonify({
@@ -110,6 +144,13 @@ def get_property(property_code):
 def set_property():
     """Set device property"""
     try:
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
         data = request.get_json()
         property_code = data.get("property")
         value = data.get("value")
@@ -120,7 +161,7 @@ def set_property():
                 "error": "Missing property or value"
             }), 400
         
-        result = client.set_device_property(property_code, value)
+        result = client.set_device_property(PRIMARY_DEVICE_ID, token, property_code, value)
         
         return jsonify({
             "success": result,
@@ -137,6 +178,13 @@ def set_property():
 def batch_set():
     """Set multiple properties at once"""
     try:
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
         data = request.get_json()
         properties = data.get("properties", [])
         
@@ -144,7 +192,7 @@ def batch_set():
         for prop in properties:
             property_code = prop.get("property")
             value = prop.get("value")
-            result = client.set_device_property(property_code, value)
+            result = client.set_device_property(PRIMARY_DEVICE_ID, token, property_code, value)
             results[property_code] = result
         
         return jsonify({
@@ -161,11 +209,19 @@ def batch_set():
 def get_device_info():
     """Get device information"""
     try:
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
+        props = client.get_device_properties(PRIMARY_DEVICE_ID, token)
         info = {
-            "device_id": client.device_id,
+            "device_id": PRIMARY_DEVICE_ID,
             "region": client.region,
             "online": True,
-            "properties_count": len(client.get_device_properties())
+            "properties_count": len(props)
         }
         return jsonify({
             "success": True,
@@ -216,8 +272,17 @@ def get_property_schemas():
 def health_check():
     """Health check endpoint"""
     try:
-        # Simple health check: verify we can get properties
-        props = client.get_device_properties()
+        # Try to get token to verify connection
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "status": "unhealthy",
+                "connected": False,
+                "error": "Failed to get access token"
+            }), 503
+        
+        # Try to get properties
+        props = client.get_device_properties(PRIMARY_DEVICE_ID, token)
         
         if props and isinstance(props, dict):
             return jsonify({
@@ -246,7 +311,14 @@ def health_check():
 def get_boolcode():
     """Get boolCode property (DP_ID 123) - String value"""
     try:
-        props = client.get_device_properties()
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
+        props = client.get_device_properties(PRIMARY_DEVICE_ID, token)
         boolcode_value = props.get("boolCode")
         
         if boolcode_value is None:
@@ -272,6 +344,13 @@ def get_boolcode():
 def set_boolcode():
     """Set boolCode property (DP_ID 123) - String value"""
     try:
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
         data = request.get_json()
         value = data.get("value")
         
@@ -284,7 +363,7 @@ def set_boolcode():
         # Ensure value is string
         value_str = str(value)
         
-        result = client.set_device_property("boolCode", value_str)
+        result = client.set_device_property(PRIMARY_DEVICE_ID, token, "boolCode", value_str)
         
         return jsonify({
             "success": result,
@@ -302,7 +381,14 @@ def set_boolcode():
 def ha_entities():
     """Generate Home Assistant entity definitions"""
     try:
-        props = client.get_device_properties()
+        token = client.get_token()
+        if not token:
+            return jsonify({
+                "success": False,
+                "error": "Failed to get access token"
+            }), 401
+        
+        props = client.get_device_properties(PRIMARY_DEVICE_ID, token)
         
         entities = {}
         for code, value in props.items():
